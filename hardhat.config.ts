@@ -23,21 +23,36 @@ const chainIds = {
     mainnet: 1,
     rinkeby: 4,
     ropsten: 3,
+    bsctest:97,
 };
 
 // Ensure that we have all the environment variables we need.
 const privateKey = process.env.PRIVATE_KEY ?? "NO_PRIVATE_KEY";
 // Make sure node is setup on Alchemy website
 const alchemyApiKey = process.env.ALCHEMY_API_KEY ?? "NO_ALCHEMY_API_KEY";
+const infuraApiKey = process.env.InfuraApiKey ?? "NO_ALCHEMY_API_KEY";
+
+// function getChainConfig(network: keyof typeof chainIds): NetworkUserConfig {
+//     const url = `https://eth-${network}.alchemyapi.io/v2/${alchemyApiKey}`;
+//     return {
+//         accounts: [`${privateKey}`],
+//         chainId: chainIds[network],
+//         url,
+//     };
+// }
+
+const bscTestnetUrl = process.env.BSC_TESTNET_URL ?? "https://data-seed-prebsc-1-s1.binance.org:8545/";
 
 function getChainConfig(network: keyof typeof chainIds): NetworkUserConfig {
-    const url = `https://eth-${network}.alchemyapi.io/v2/${alchemyApiKey}`;
+    const url = network === "bsctest" ? bscTestnetUrl : `https://${network}.infura.io/v3/${infuraApiKey}`;
     return {
         accounts: [`${privateKey}`],
         chainId: chainIds[network],
         url,
     };
 }
+
+
 
 const config: HardhatUserConfig = {
     defaultNetwork: "hardhat",
@@ -56,8 +71,13 @@ const config: HardhatUserConfig = {
         },
         // Uncomment for testing. Commented due to CI issues
         mainnet: getChainConfig("mainnet"),
-        // rinkeby: getChainConfig("rinkeby"),
-        // ropsten: getChainConfig("ropsten"),
+        rinkeby: getChainConfig("rinkeby"),
+        ropsten: getChainConfig("ropsten"),
+        bsctest: {
+            url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+            accounts: [`${privateKey}`],
+            chainId: 97, // 97 是 BSC 测试网络的链 ID
+        },
     },
     paths: {
         artifacts: "./artifacts",
